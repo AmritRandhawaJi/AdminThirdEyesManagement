@@ -21,6 +21,7 @@ class _Permissions extends State<Permissions> {
   bool _fetching = false;
   late NotificationSettings _settings;
 
+
   Future<void> requestPermissions() async {
     setState(() {
       _fetching = true;
@@ -55,6 +56,11 @@ class _Permissions extends State<Permissions> {
     });
   }
 
+  @override
+  void initState() {
+    requestPermissions();
+    super.initState();
+  }
   Widget row(String title, String value) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

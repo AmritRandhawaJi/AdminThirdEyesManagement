@@ -1,28 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:http/http.dart' as http;
 import 'package:thirdeyesmanagmentadmin/decision.dart';
+import 'package:thirdeyesmanagmentadmin/messaging/permissions.dart';
 import 'package:thirdeyesmanagmentadmin/screens/admin_home.dart';
-
-import 'messaging/message.dart';
-
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   await setupFlutterNotifications();
   showFlutterNotification(message);
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  if (kDebugMode) {
-    print('Handling a background message ${message.messageId}');
-  }
+
 }
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
@@ -75,12 +69,14 @@ void showFlutterNotification(RemoteMessage message) {
         android: AndroidNotificationDetails(
           channel.id,
           channel.name,
+          sound: const RawResourceAndroidNotificationSound('android_beep'),
           channelDescription: channel.description,
           icon: '@mipmap/ic_launcher',
         ),
       ),
     );
   }
+
 }
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
@@ -89,176 +85,49 @@ late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await FirebaseAppCheck.instance
+      .activate(androidProvider: AndroidProvider.debug);
   if (!kIsWeb) {
     await setupFlutterNotifications();
   }
 
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-
-      routes: {
-        '/': (context) => const Application(),
-        '/message': (context) => const MessageView(),
-      },
-    );
-  }
-}
-
-// Crude counter to make messages unique
-int _messageCount = 0;
-
-String constructFCMPayload(String? token) {
-  _messageCount++;
-  return jsonEncode({
-    'token': token,
-    'data': {
-      'via': 'FlutterFire Cloud Messaging!!!',
-      'count': _messageCount.toString(),
-    },
-    'notification': {
-      'title': 'Hello FlutterFire!',
-      'body': 'This notification (#$_messageCount) was created via FCM!',
-    },
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(const MaterialApp(home: MyApp()));
   });
 }
 
-/// Renders the example application.
-class Application extends StatefulWidget {
-  const Application({super.key});
+
+class MyApp extends StatefulWidget {
+
+
+  const MyApp({super.key});
 
   @override
-  State<StatefulWidget> createState() => _Application();
+  State<MyApp> createState() => _MyAppState();
 }
 
-class _Application extends State<Application> {
-  String? _token;
-  String? initialMessage;
-  bool resolved = false;
+class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    super.initState();
-
-    FirebaseMessaging.instance.getInitialMessage().then(
-          (value) => setState(
-            () {
-          resolved = true;
-          initialMessage = value?.data.toString();
-        },
-      ),
-    );
-
+    const Permissions();
     FirebaseMessaging.onMessage.listen(showFlutterNotification);
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      if (kDebugMode) {
-        print('A new onMessageOpenedApp event was published!');
-      }
-      Navigator.pushNamed(
-        context,
-        '/message',
-        arguments: MessageArguments(message, true),
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback(
+            (_) => Future.delayed(const Duration(seconds: 3), () {
+          userState();
+        }));
+    super.initState();
   }
-
-  Future<void> sendPushMessage() async {
-    if (_token == null) {
-      if (kDebugMode) {
-        print('Unable to send FCM message, no token exists.');
-      }
-      return;
-    }
-
-    try {
-      await http.post(
-        Uri.parse('https://api.rnfirebase.io/messaging/send'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: constructFCMPayload(_token),
-      );
-      if (kDebugMode) {
-        print('FCM request for device sent!');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-    }
-  }
-
-  Future<void> onActionSelected(String value) async {
-    switch (value) {
-      case 'subscribe':
-        {
-          if (kDebugMode) {
-            print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test".',
-          );
-          }
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
-          if (kDebugMode) {
-            print(
-            'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.',
-          );
-          }
-        }
-        break;
-      case 'unsubscribe':
-        {
-          if (kDebugMode) {
-            print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".',
-          );
-          }
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
-          if (kDebugMode) {
-            print(
-            'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.',
-          );
-          }
-        }
-        break;
-      case 'get_apns_token':
-        {
-          if (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.macOS) {
-
-            String? token = await FirebaseMessaging.instance.getAPNSToken();
-            if (kDebugMode) {
-              print('FlutterFire Messaging Example: Got APNs token: $token');
-            }
-          } else {
-            if (kDebugMode) {
-              print(
-              'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.',
-            );
-            }
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback(
-            (_) => Future.delayed(const Duration(seconds: 2), () {
-userState();
-        }));
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator())
+
+    return const MaterialApp(
+      home: Scaffold(
+          body: Center(child: CircularProgressIndicator())
+      ),
     );
   }
   Future<void> userState() async {
@@ -266,12 +135,11 @@ userState();
       await FirebaseAuth.instance.currentUser?.reload();
       if (FirebaseAuth.instance.currentUser != null) {
         if(mounted){
-        goAdminHome();
+          goAdminHome();
         }
       } else {
         if(mounted){
-
-        moveToDecision();
+          moveToDecision();
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -307,8 +175,6 @@ userState();
     }
   }
 
-
-
   void goAdminHome() {
     Navigator.pushAndRemoveUntil(
         context,
@@ -320,32 +186,4 @@ userState();
 }
 
 
-/// UI Widget for displaying metadata.
-class MetaCard extends StatelessWidget {
-  final String _title;
-  final Widget _children;
 
-  const MetaCard(this._title, this._children, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Text(_title, style: const TextStyle(fontSize: 18)),
-              ),
-              _children,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
