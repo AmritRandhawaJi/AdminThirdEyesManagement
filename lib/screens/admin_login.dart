@@ -171,6 +171,9 @@ class _AdminLoginState extends State<AdminLogin> {
 
     if (_passwordKey.currentState!.validate() &
         _emailKey.currentState!.validate()) {
+      setState(() {
+        loading = true;
+      });
       db
           .collection("accounts")
           .doc(emailController.value.text.toLowerCase())
@@ -212,9 +215,7 @@ class _AdminLoginState extends State<AdminLogin> {
 
   Future<void> _login(String emailAddress, String password) async {
     try {
-      setState(() {
-        loading = true;
-      });
+
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: emailAddress, password: password);
       _loggedIn();

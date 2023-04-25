@@ -8,7 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:thirdeyesmanagmentadmin/all_sale.dart';
-import 'package:thirdeyesmanagmentadmin/decision.dart';
+import 'package:thirdeyesmanagmentadmin/main.dart';
+import 'package:thirdeyesmanagmentadmin/screens/client_details_page.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({Key? key}) : super(key: key);
@@ -53,6 +54,8 @@ class _AdminHomeState extends State<AdminHome> {
 
   DateTime selectedDate = DateTime.now();
 
+  bool loading = false;
+
   @override
   void dispose() {
     db.terminate();
@@ -68,14 +71,8 @@ class _AdminHomeState extends State<AdminHome> {
 
   @override
   Widget build(BuildContext context) {
-    double panelHeightOpen = MediaQuery
-        .of(context)
-        .size
-        .height / 2;
-    double panelHeightClosed = MediaQuery
-        .of(context)
-        .size
-        .height / 7;
+    double panelHeightOpen = MediaQuery.of(context).size.height / 2;
+    double panelHeightClosed = MediaQuery.of(context).size.height / 7;
     return Scaffold(
         backgroundColor: CupertinoColors.lightBackgroundGray,
         resizeToAvoidBottomInset: false,
@@ -98,7 +95,7 @@ class _AdminHomeState extends State<AdminHome> {
                       Text(
                         "Today's Sale",
                         style:
-                        TextStyle(fontSize: 18, fontFamily: "Montserrat"),
+                            TextStyle(fontSize: 18, fontFamily: "Montserrat"),
                       ),
                     ],
                   ),
@@ -135,46 +132,42 @@ class _AdminHomeState extends State<AdminHome> {
                       onTap: () async {
                         showDialog(
                           context: context,
-                          builder: (context) =>
-                              AlertDialog(
-                                title: const Text("Sign-Out"),
-                                content: const Text(
-                                    "Would you like to Sign-out?",
-                                    style: TextStyle(color: Colors.red)),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () async {
-                                        try {
-                                          await FirebaseAuth.instance
-                                              .signOut()
-                                              .whenComplete(() =>
-                                          {
-                                            Navigator.pushAndRemoveUntil(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                  const Decision(),
-                                                ),
+                          builder: (context) => AlertDialog(
+                            title: const Text("Sign-Out"),
+                            content: const Text("Would you like to Sign-out?",
+                                style: TextStyle(color: Colors.red)),
+                            actions: [
+                              TextButton(
+                                  onPressed: () async {
+                                    try {
+                                      await FirebaseAuth.instance
+                                          .signOut()
+                                          .whenComplete(() => {
+                                                Navigator.pushAndRemoveUntil(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const MyApp(),
+                                                    ),
                                                     (route) => false)
-                                          });
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(const SnackBar(
+                                              });
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
                                               content: Text(
                                                   "Something went wrong")));
-                                        }
-                                      },
-                                      child: const Text("Yes",
-                                          style: TextStyle(color: Colors.red))),
-                                  TextButton(
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("No",
-                                          style: TextStyle(
-                                              color: Colors.green)))
-                                ],
-                              ),
+                                    }
+                                  },
+                                  child: const Text("Yes",
+                                      style: TextStyle(color: Colors.red))),
+                              TextButton(
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("No",
+                                      style: TextStyle(color: Colors.green)))
+                            ],
+                          ),
                         );
                       },
                       child: const Icon(
@@ -206,20 +199,52 @@ class _AdminHomeState extends State<AdminHome> {
                     },
                     decoration: InputDecoration(
                         counterText: "",
-                        suffixIcon: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            GestureDetector(
-                                onTap: () {
-                                  if (searchKey.currentState!.validate()) {}
-                                },
-                                child: const CircleAvatar(
-                                  backgroundColor: Colors.green,
-                                  child:
-                                  Icon(Icons.search, color: Colors.white),
-                                ))
-                          ],
-                        ),
+                        suffixIcon: loading
+                            ? const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1,
+                                ),
+                              )
+                            : Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  GestureDetector(
+                                      onTap: () {
+                                        if (searchKey.currentState!
+                                            .validate()) {
+                                          setState(() {
+                                            loading = true;
+                                          });
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) =>
+                                                  Future.delayed(
+                                                      const Duration(
+                                                          seconds: 1), () {
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              ClientDetailsPage(
+                                                            number:
+                                                                searchController
+                                                                    .value.text,
+                                                          ),
+                                                        ));
+
+                                                    setState(() {
+                                                      loading = false;
+                                                    });
+                                                  }));
+                                        }
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: Colors.green,
+                                        child: Icon(Icons.search,
+                                            color: Colors.white),
+                                      ))
+                                ],
+                              ),
                         filled: true,
                         hintText: "Search Clients",
                         fillColor: Colors.white,
@@ -290,7 +315,7 @@ class _AdminHomeState extends State<AdminHome> {
                           GestureDetector(
                               onTap: () async {
                                 DateTime? date =
-                                await showMonthPicker(context: context);
+                                    await showMonthPicker(context: context);
                                 if (date != null) {
                                   setState(() {
                                     month = DateFormat.MMMM().format(date);
@@ -311,7 +336,7 @@ class _AdminHomeState extends State<AdminHome> {
                           GestureDetector(
                               onTap: () async {
                                 DateTime? date =
-                                await showMonthPicker(context: context);
+                                    await showMonthPicker(context: context);
                                 if (date != null) {
                                   setState(() {
                                     years = date;
@@ -331,8 +356,8 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             loadingIndicator
                 ? const CircularProgressIndicator(
-              strokeWidth: 2,
-            )
+                    strokeWidth: 2,
+                  )
                 : Container(),
             Column(
               children: [
@@ -351,245 +376,241 @@ class _AdminHomeState extends State<AdminHome> {
                 ),
                 panelLoad
                     ? DelayedDisplay(
-                  child: Column(
-                    children: [
-                      Card(
                         child: Column(
                           children: [
-                            Row(
-                              children: const [
-                                Text(
-                                  "Walkin Clients",
-                                  style: TextStyle(
-                                      fontFamily: "Montserrat",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                Icon(
-                                  Icons.show_chart,
-                                  color: Colors.green,
-                                )
-                              ],
+                            Card(
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: const [
+                                      Text(
+                                        "Walkin Clients",
+                                        style: TextStyle(
+                                            fontFamily: "Montserrat",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
+                                      ),
+                                      Icon(
+                                        Icons.show_chart,
+                                        color: Colors.green,
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("Cash- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(walkinCash.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Card- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(walkinCard.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("UPI- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(walkinUPI.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Wallet- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(walkinWallet.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Card(
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: const [
+                                      Text(
+                                        "Membership Sold",
+                                        style: TextStyle(
+                                            fontFamily: "Montserrat",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
+                                      ),
+                                      Icon(
+                                        Icons.graphic_eq,
+                                        color: Colors.orange,
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("Cash- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(membershipCash.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Card- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(memberShipCard.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("UPI- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(memberShipUPI.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Wallet- Rs.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(memberShipWallet.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                             const SizedBox(
-                              height: 5,
+                              height: 10,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            Card(
+                              child: Column(
                                 children: [
                                   Row(
-                                    children: [
-                                      const Text("Cash- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(walkinCash.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
+                                    children: const [
+                                      Text(
+                                        "Members Visit",
+                                        style: TextStyle(
+                                            fontFamily: "Montserrat",
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
+                                      ),
+                                      Icon(
+                                        Icons.directions_walk,
+                                        color: Colors.blue,
+                                      )
                                     ],
                                   ),
-                                  Row(
-                                    children: [
-                                      const Text("Card- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(walkinCard.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
+                                  const SizedBox(
+                                    height: 15,
                                   ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text("UPI- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(walkinUPI.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Wallet- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(walkinWallet.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Card(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: const [
-                                Text(
-                                  "Membership Sold",
-                                  style: TextStyle(
-                                      fontFamily: "Montserrat",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                Icon(
-                                  Icons.graphic_eq,
-                                  color: Colors.orange,
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text("Cash- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(membershipCash.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Card- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(memberShipCard.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text("UPI- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(memberShipUPI.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text("Wallet- Rs.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(memberShipWallet.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Card(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: const [
-                                Text(
-                                  "Members Visit",
-                                  style: TextStyle(
-                                      fontFamily: "Montserrat",
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                Icon(
-                                  Icons.directions_walk,
-                                  color: Colors.blue,
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text("Count.",
-                                          style: TextStyle(
-                                              color: Colors.black54)),
-                                      Text(members.toString(),
-                                          style: const TextStyle(
-                                              fontFamily: "Montserrat",
-                                              fontSize: 22)),
-                                    ],
-                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("Count.",
+                                                style: TextStyle(
+                                                    color: Colors.black54)),
+                                            Text(members.toString(),
+                                                style: const TextStyle(
+                                                    fontFamily: "Montserrat",
+                                                    fontSize: 22)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
                                 ],
                               ),
                             )
                           ],
                         ),
                       )
-                    ],
-                  ),
-                )
                     : Container(),
                 panelLoad
                     ? Container()
                     : Image.asset(
-                  "assets/noSale.png",
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .width - 100,
-                ),
-                SizedBox(height: MediaQuery
-                    .of(context)
-                    .size
-                    .height / 3,)
+                        "assets/noSale.png",
+                        height: MediaQuery.of(context).size.width - 100,
+                      ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 3,
+                )
               ],
             )
           ],
@@ -645,10 +666,7 @@ class _AdminHomeState extends State<AdminHome> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width / 2,
+                    width: MediaQuery.of(context).size.width / 2,
                     child: TextField(
                         controller: dateController,
                         //editing controller of this TextField
@@ -673,8 +691,7 @@ class _AdminHomeState extends State<AdminHome> {
                               lastDate: DateTime(2030));
                           if (pickedDate != null) {
                             selectedDate = pickedDate;
-                            String formattedDate = DateFormat('dd-MM-yyyy')
-                                .format(
+                            String formattedDate = DateFormat('dd-MM-yyyy').format(
                                 pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
                             setState(() {
                               dateController.text = formattedDate;
@@ -692,14 +709,15 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.green,
                   child: const Text("Request"),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) =>
-                          AllSale(spaName: dropDownValue,
-                              month: DateFormat('MMMM')
-                                  .format(
-                                  selectedDate),
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllSale(
+                              spaName: dropDownValue,
+                              month: DateFormat('MMMM').format(selectedDate),
                               date: dateController.value.text,
-                              year: selectedDate.year.toString()),));
+                              year: selectedDate.year.toString()),
+                        ));
                   }),
             ),
             Padding(
@@ -707,10 +725,7 @@ class _AdminHomeState extends State<AdminHome> {
               child: Icon(
                 Icons.bar_chart_sharp,
                 color: Colors.green[400],
-                size: MediaQuery
-                    .of(context)
-                    .size
-                    .height / 10,
+                size: MediaQuery.of(context).size.height / 10,
               ),
             )
           ],
