@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,14 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:thirdeyesmanagmentadmin/decision.dart';
-import 'package:thirdeyesmanagmentadmin/messaging/permissions.dart';
 import 'package:thirdeyesmanagmentadmin/screens/admin_home.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   await setupFlutterNotifications();
-  showFlutterNotification(message);
 
 }
 
@@ -57,27 +56,7 @@ Future<void> setupFlutterNotifications() async {
   isFlutterLocalNotificationsInitialized = true;
 }
 
-void showFlutterNotification(RemoteMessage message) {
-  RemoteNotification? notification = message.notification;
-  AndroidNotification? android = message.notification?.android;
-  if (notification != null && android != null && !kIsWeb) {
-    flutterLocalNotificationsPlugin.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          sound: const RawResourceAndroidNotificationSound('android_beep'),
-          channelDescription: channel.description,
-          icon: '@mipmap/ic_launcher',
-        ),
-      ),
-    );
-  }
 
-}
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -111,19 +90,40 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+ final db = FirebaseFirestore.instance;
+  late Stream<String> _tokenStream;
+
+
+  void setToken(String? token) {
+    db.collection("accounts").doc("support@3rdeyesmanagement.in").update({
+      "token" : token
+    });
+
+  }
+@override
+  void dispose() {
+    db.clearPersistence();
+    db.terminate();
+    super.dispose();
+  }
   @override
   void initState() {
-    const Permissions();
-    FirebaseMessaging.onMessage.listen(showFlutterNotification);
+    FirebaseMessaging.instance
+        .getToken(
+        vapidKey:
+        'BNKkaUWxyP_yC_lki1kYazgca0TNhuzt2drsOrL6WrgGbqnMnr8ZMLzg_rSPDm6HKphABS0KzjPfSqCXHXEd06Y')
+        .then(setToken);
+    _tokenStream = FirebaseMessaging.instance.onTokenRefresh;
+    _tokenStream.listen(setToken);
+    super.initState();
+
+  }
+  @override
+  Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(
             (_) => Future.delayed(const Duration(seconds: 3), () {
           userState();
         }));
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-
     return const MaterialApp(
       home: Scaffold(
           body: Center(child: CircularProgressIndicator())
