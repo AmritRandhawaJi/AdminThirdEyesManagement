@@ -121,59 +121,76 @@ class _AdminHomeState extends State<AdminHome> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Hello, Admin",
-                    style: TextStyle(
-                        fontFamily: "Montserrat",
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      const Text(
+                        "Hello, Admin",
+                        style: TextStyle(
+                            fontFamily: "Montserrat",
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5),
+                        child: Image.asset("assets/checkMark.png",
+                            height: MediaQuery.of(context).size.width / 15,
+                            width: MediaQuery.of(context).size.width / 15),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                      onTap: () async {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text("Sign-Out"),
-                            content: const Text("Would you like to Sign-out?",
-                                style: TextStyle(color: Colors.red)),
-                            actions: [
-                              TextButton(
-                                  onPressed: () async {
-                                    try {
-                                      await FirebaseAuth.instance
-                                          .signOut()
-                                          .whenComplete(() => {
-                                                Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const MyApp(),
-                                                    ),
-                                                    (route) => false)
-                                              });
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                              content: Text(
-                                                  "Something went wrong")));
-                                    }
-                                  },
-                                  child: const Text("Yes",
-                                      style: TextStyle(color: Colors.red))),
-                              TextButton(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text("No",
-                                      style: TextStyle(color: Colors.green)))
-                            ],
-                          ),
-                        );
-                      },
-                      child: const Icon(
-                        Icons.power_settings_new_rounded,
-                        size: 30,
-                      ))
+                  Row(
+                    children: [
+                      GestureDetector(
+                          onTap: () async {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Sign-Out"),
+                                content: const Text(
+                                    "Would you like to Sign-out?",
+                                    style: TextStyle(color: Colors.red)),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        try {
+                                          await FirebaseAuth.instance
+                                              .signOut()
+                                              .whenComplete(() => {
+                                                    Navigator
+                                                        .pushAndRemoveUntil(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  const MyApp(),
+                                                            ),
+                                                            (route) => false)
+                                                  });
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                                  content: Text(
+                                                      "Something went wrong")));
+                                        }
+                                      },
+                                      child: const Text("Yes",
+                                          style: TextStyle(color: Colors.red))),
+                                  TextButton(
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("No",
+                                          style:
+                                              TextStyle(color: Colors.green)))
+                                ],
+                              ),
+                            );
+                          },
+                          child: const Icon(
+                            Icons.power_settings_new_rounded,
+                            size: 30,
+                          )),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -284,7 +301,7 @@ class _AdminHomeState extends State<AdminHome> {
                                           items: items.map((String items) {
                                             return DropdownMenuItem(
                                               value: items,
-                                              child: Text(items),
+                                              child: Text(items,style: const TextStyle(fontWeight: FontWeight.bold)),
                                             );
                                           }).toList(),
                                           // After selecting the desired option,it will
@@ -304,7 +321,7 @@ class _AdminHomeState extends State<AdminHome> {
                               },
                               child: Text(dropDownValue,
                                   style: const TextStyle(
-                                      fontFamily: "Montserrat"))),
+                                      fontFamily: "Montserrat",fontWeight: FontWeight.bold))),
                         ],
                       ),
                     ),
@@ -325,7 +342,7 @@ class _AdminHomeState extends State<AdminHome> {
                               },
                               child: Text(month,
                                   style: const TextStyle(
-                                      fontFamily: "Montserrat"))),
+                                      fontFamily: "Montserrat",fontWeight: FontWeight.bold))),
                         ],
                       ),
                     ),
@@ -346,7 +363,7 @@ class _AdminHomeState extends State<AdminHome> {
                               },
                               child: Text(years.year.toString(),
                                   style: const TextStyle(
-                                      fontFamily: "Montserrat"))),
+                                      fontFamily: "Montserrat",fontWeight: FontWeight.bold))),
                         ],
                       ),
                     )
@@ -364,13 +381,21 @@ class _AdminHomeState extends State<AdminHome> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("Till Month Sale",
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      const Text("Till Month Sale",
                           style: TextStyle(
                               fontFamily: "Montserrat",
                               color: Colors.green,
-                              fontWeight: FontWeight.bold))
+                              fontWeight: FontWeight.bold)),
+                      GestureDetector(
+                          onTap: () {
+                            getData();
+                          },
+                          child: const Icon(
+                            Icons.refresh,
+                            color: Colors.green,
+                          ))
                     ],
                   ),
                 ),

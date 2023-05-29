@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:thirdeyesmanagmentadmin/screens/admin_home.dart';
 
-
 class AdminLogin extends StatefulWidget {
   const AdminLogin({Key? key}) : super(key: key);
 
@@ -34,134 +33,124 @@ class _AdminLoginState extends State<AdminLogin> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: const Color(0XFFe6f0f9),
-        body: SafeArea(
-          child: DelayedDisplay(
+    return Scaffold(
+        body: DelayedDisplay(
             slidingCurve: Curves.bounceOut,
-            child: LayoutBuilder(
-              builder:
-                  (BuildContext context, BoxConstraints viewportConstraints) {
-                return SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        Image.asset("assets/admin.png",
-                            height: MediaQuery.of(context).size.width - 50,
-                            width: MediaQuery.of(context).size.width - 50),
-                        Column(
-                          children: [
-                            Form(
-                              key: _emailKey,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: TextFormField(
-                                  controller: emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "Enter your email";
-                                    } else if (!EmailValidator.validate(
-                                        emailController.value.text)) {
-                                      return "Email invalid";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  showCursor: true,
-                                  decoration: InputDecoration(
-                                      filled: true,
-                                      hintText: "Email",
-                                      prefixIcon: const Icon(
-                                          Icons.email_outlined,
-                                          color: Colors.black54,
-                                          size: 20),
-                                      fillColor: Colors.white,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide.none,
-                                      )),
-                                ),
-                              ),
-                            ),
-                            Form(
-                              key: _passwordKey,
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: TextFormField(
-                                  obscureText: showPassword,
-                                  controller: passwordController,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "Enter password";
-                                    } else if (value.length < 8) {
-                                      return "8 characters required";
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  showCursor: true,
-                                  decoration: InputDecoration(
-                                      filled: true,
-                                      hintText: "Password",
-                                      prefixIcon: const Icon(Icons.lock_outline,
-                                          color: Colors.black54, size: 20),
-                                      fillColor: Colors.white,
-                                      suffixIcon: GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              if (showPassword) {
-                                                showPassword = false;
-                                              } else {
-                                                showPassword = true;
-                                              }
-                                            });
-                                          },
-                                          child: Icon(
-                                            Icons.remove_red_eye,
-                                            color: showPassword
-                                                ? Colors.grey
-                                                : Colors.blueAccent,
-                                          )),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide.none,
-                                      )),
-                                ),
-                              ),
-                            ),
-                          ],
+            child: Container(
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                colors: [Colors.blueGrey, Colors.white],
+                begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter
+              )),
+              child: Column(
+                children: <Widget>[
+                  Image.asset("assets/admin.png",
+                      height: MediaQuery.of(context).size.width - 50,
+                      width: MediaQuery.of(context).size.width - 50),
+                  Column(
+                    children: [
+                      Form(
+                        key: _emailKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextFormField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return "Enter your email";
+                              } else if (!EmailValidator.validate(
+                                  emailController.value.text)) {
+                                return "Email invalid";
+                              } else {
+                                return null;
+                              }
+                            },
+                            showCursor: true,
+                            decoration: InputDecoration(
+                                filled: true,
+                                hintText: "Email",
+                                prefixIcon: const Icon(Icons.email_outlined,
+                                    color: Colors.black54, size: 20),
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                )),
+                          ),
                         ),
-                        loading
-                            ? const CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.blueAccent,
-                              )
-                            : Container(
-                                height: 20,
-                              ),
-                        const SizedBox(height: 5),
-                        CupertinoButton(
-                            borderRadius: BorderRadius.circular(30),
-                            color: Colors.green,
-                            onPressed: loading
-                                ? null
-                                : () {
-                                    _authenticateUser();
-                                  },
-                            child: const Text("Admin Login",
-                                style: TextStyle(color: Colors.white))),
-
-                      ],
-                    ));
-              },
-            ),
-          ),
-        ),
-      ),
-    );
+                      ),
+                      Form(
+                        key: _passwordKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: TextFormField(
+                            obscureText: showPassword,
+                            controller: passwordController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return "Enter password";
+                              } else if (value.length < 8) {
+                                return "8 characters required";
+                              } else {
+                                return null;
+                              }
+                            },
+                            showCursor: true,
+                            decoration: InputDecoration(
+                                filled: true,
+                                hintText: "Password",
+                                prefixIcon: const Icon(Icons.lock_outline,
+                                    color: Colors.black54, size: 20),
+                                fillColor: Colors.white,
+                                suffixIcon: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (showPassword) {
+                                          showPassword = false;
+                                        } else {
+                                          showPassword = true;
+                                        }
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.remove_red_eye,
+                                      color: showPassword
+                                          ? Colors.grey
+                                          : Colors.blueAccent,
+                                    )),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                )),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  loading
+                      ? const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blueAccent,
+                        )
+                      : Container(
+                          height: 20,
+                        ),
+                  const SizedBox(height: 5),
+                  CupertinoButton(
+                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.green,
+                      onPressed: loading
+                          ? null
+                          : () {
+                              _authenticateUser();
+                            },
+                      child: const Text("Admin Login",
+                          style: TextStyle(color: Colors.white))),
+                ],
+              ),
+            )));
   }
 
   void _authenticateUser() {
@@ -179,14 +168,14 @@ class _AdminLoginState extends State<AdminLogin> {
           .doc(emailController.value.text.toLowerCase())
           .get()
           .then((value) => {
-            if(value.exists){
-              if (value.get("adminAccess"))
-                {
-                  _login(emailController.value.text,
-                      passwordController.value.text)
-                }
-            }
-
+                if (value.exists)
+                  {
+                    if (value.get("adminAccess"))
+                      {
+                        _login(emailController.value.text,
+                            passwordController.value.text)
+                      }
+                  }
                 else
                   {
                     showDialog(
@@ -201,6 +190,9 @@ class _AdminLoginState extends State<AdminLogin> {
                                 TextButton(
                                     onPressed: () {
                                       Navigator.pop(ctx);
+                                      setState(() {
+                                        loading = false;
+                                      });
                                     },
                                     child: const Text(
                                       "Try again",
@@ -215,7 +207,6 @@ class _AdminLoginState extends State<AdminLogin> {
 
   Future<void> _login(String emailAddress, String password) async {
     try {
-
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: emailAddress, password: password);
       _loggedIn();
@@ -258,7 +249,11 @@ class _AdminLoginState extends State<AdminLogin> {
   }
 
   void _loggedIn() {
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const AdminHome(),), (route) => false);
-
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AdminHome(),
+        ),
+        (route) => false);
   }
-  }
+}
