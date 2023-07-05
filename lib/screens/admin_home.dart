@@ -21,7 +21,7 @@ class AdminHome extends StatefulWidget {
 class _AdminHomeState extends State<AdminHome> {
   final searchController = TextEditingController();
   final GlobalKey<FormState> searchKey = GlobalKey<FormState>();
-  String dropDownValue = 'Azon Spa';
+  String dropDownValue = 'Heritage Spa';
 
   String month = DateFormat.MMMM().format(DateTime.now());
   DateTime years = DateTime.now();
@@ -40,10 +40,10 @@ class _AdminHomeState extends State<AdminHome> {
   int members = 0;
 
   var items = [
-    'Azon Spa',
     'Heritage Spa',
     'The Annandam Unisex Spa',
-    'Wave Spa',
+    'Heritage Spa Patel Nagar',
+    'Treat Spa'
   ];
 
   final dateController = TextEditingController();
@@ -86,11 +86,11 @@ class _AdminHomeState extends State<AdminHome> {
             collapsed: Container(
               decoration: BoxDecoration(
                   color: Colors.white, borderRadius: BorderRadius.circular(30)),
-              child: Center(
+              child: const Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: EdgeInsets.only(top: 20),
                   child: Column(
-                    children: const [
+                    children: [
                       Icon(Icons.graphic_eq_outlined, color: Colors.green),
                       Text(
                         "Today's Sale",
@@ -155,8 +155,7 @@ class _AdminHomeState extends State<AdminHome> {
                                         try {
                                           await FirebaseAuth.instance
                                               .signOut()
-                                              .whenComplete(() => {
-                                                    Navigator
+                                              .whenComplete(() => Navigator
                                                         .pushAndRemoveUntil(
                                                             context,
                                                             MaterialPageRoute(
@@ -164,7 +163,7 @@ class _AdminHomeState extends State<AdminHome> {
                                                                   const MyApp(),
                                                             ),
                                                             (route) => false)
-                                                  });
+                                                  );
                                         } catch (e) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
@@ -360,6 +359,7 @@ class _AdminHomeState extends State<AdminHome> {
                                     getData();
                                   });
                                 }
+
                               },
                               child: Text(years.year.toString(),
                                   style: const TextStyle(
@@ -406,8 +406,8 @@ class _AdminHomeState extends State<AdminHome> {
                             Card(
                               child: Column(
                                 children: [
-                                  Row(
-                                    children: const [
+                                  const Row(
+                                    children: [
                                       Text(
                                         "Walkin Clients",
                                         style: TextStyle(
@@ -493,8 +493,8 @@ class _AdminHomeState extends State<AdminHome> {
                             Card(
                               child: Column(
                                 children: [
-                                  Row(
-                                    children: const [
+                                  const Row(
+                                    children: [
                                       Text(
                                         "Membership Sold",
                                         style: TextStyle(
@@ -582,8 +582,8 @@ class _AdminHomeState extends State<AdminHome> {
                             Card(
                               child: Column(
                                 children: [
-                                  Row(
-                                    children: const [
+                                  const Row(
+                                    children: [
                                       Text(
                                         "Members Visit",
                                         style: TextStyle(

@@ -50,9 +50,9 @@ class _WalkinNavSaleState extends State<MembersNavSale> {
                         onPressed: () {
                           todayCash();
                         },
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.refresh,
                               color: Colors.green,

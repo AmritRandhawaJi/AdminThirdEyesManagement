@@ -307,10 +307,10 @@ class _MemberDetailsPageState extends State<MemberDetailsPage> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
                   child: Row(
-                    children: const [
+                    children: [
                       Text("Membership",
                           style: TextStyle(fontSize: 18, color: Colors.white,fontFamily: "Montserrat")),
                     ],

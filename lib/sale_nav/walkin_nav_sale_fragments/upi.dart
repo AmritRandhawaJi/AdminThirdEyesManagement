@@ -42,9 +42,9 @@ class _UPIState extends State<UPI> {
                       onPressed: () {
                         todayUPI();
                       },
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.refresh,
                             color: Colors.green,
@@ -186,8 +186,8 @@ class _UPIState extends State<UPI> {
                                 style: const TextStyle(fontSize: 22)),
                           ],
                         ),
-                        Row(
-                          children: const [
+                        const Row(
+                          children: [
                             Icon(Icons.account_circle, color: Colors.blue),
                             Padding(
                               padding: EdgeInsets.only(left: 5),

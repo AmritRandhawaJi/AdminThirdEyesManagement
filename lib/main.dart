@@ -91,9 +91,8 @@ class _MyAppState extends State<MyApp> {
     try{
       await db.collection("accounts").doc("support@3rdeyesmanagement.in").update({
         "token" : token
-      }).whenComplete(() => {
-        goAdminHome()
-      });
+      }).whenComplete(() => goAdminHome()
+      );
     }catch(e){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Check Internet")));
 

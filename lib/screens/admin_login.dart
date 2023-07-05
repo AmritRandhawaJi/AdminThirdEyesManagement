@@ -4,6 +4,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:thirdeyesmanagmentadmin/screens/admin_home.dart';
 
 class AdminLogin extends StatefulWidget {
@@ -13,7 +14,10 @@ class AdminLogin extends StatefulWidget {
   State<AdminLogin> createState() => _AdminLoginState();
 }
 
-class _AdminLoginState extends State<AdminLogin> {
+class _AdminLoginState extends State<AdminLogin> with SingleTickerProviderStateMixin  {
+
+  late final AnimationController _controller;
+
   var emailController = TextEditingController();
   final GlobalKey<FormState> _emailKey = GlobalKey<FormState>();
   var passwordController = TextEditingController();
@@ -32,123 +36,135 @@ class _AdminLoginState extends State<AdminLogin> {
   }
 
   @override
+  void initState() {
+    _controller = AnimationController(vsync: this);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0XFFffffff),
         body: DelayedDisplay(
             slidingCurve: Curves.bounceOut,
-            child: Container(
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                colors: [Colors.blueGrey, Colors.white],
-                begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter
-              )),
-              child: Column(
-                children: <Widget>[
-                  Image.asset("assets/admin.png",
-                      height: MediaQuery.of(context).size.width - 50,
-                      width: MediaQuery.of(context).size.width - 50),
-                  Column(
-                    children: [
-                      Form(
-                        key: _emailKey,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: TextFormField(
-                            controller: emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Enter your email";
-                              } else if (!EmailValidator.validate(
-                                  emailController.value.text)) {
-                                return "Email invalid";
-                              } else {
-                                return null;
-                              }
-                            },
-                            showCursor: true,
-                            decoration: InputDecoration(
-                                filled: true,
-                                hintText: "Email",
-                                prefixIcon: const Icon(Icons.email_outlined,
-                                    color: Colors.black54, size: 20),
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                )),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+const Text("Welcome, Admin",style: TextStyle(fontFamily: "Montserrat",fontSize: 22),),
+                    Lottie.asset(
+                      'assets/admin.json',
+                      controller: _controller,
+                      onLoaded: (composition) {
+                        // Configure the AnimationController with the duration of the
+                        // Lottie file and start the animation.
+                        _controller
+                          ..duration = composition.duration
+                          ..repeat();
+                      },
+                    ),
+                    Column(
+                      children: [
+                        Form(
+                          key: _emailKey,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: TextFormField(
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Enter your email";
+                                } else if (!EmailValidator.validate(
+                                    emailController.value.text)) {
+                                  return "Email invalid";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              showCursor: true,
+                              decoration: InputDecoration(
+                                  filled: true,
+                                  hintText: "Email",
+                                  prefixIcon: const Icon(Icons.email_outlined,
+                                      color: Colors.black54, size: 20),
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  )),
+                            ),
                           ),
                         ),
-                      ),
-                      Form(
-                        key: _passwordKey,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: TextFormField(
-                            obscureText: showPassword,
-                            controller: passwordController,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return "Enter password";
-                              } else if (value.length < 8) {
-                                return "8 characters required";
-                              } else {
-                                return null;
-                              }
-                            },
-                            showCursor: true,
-                            decoration: InputDecoration(
-                                filled: true,
-                                hintText: "Password",
-                                prefixIcon: const Icon(Icons.lock_outline,
-                                    color: Colors.black54, size: 20),
-                                fillColor: Colors.white,
-                                suffixIcon: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        if (showPassword) {
-                                          showPassword = false;
-                                        } else {
-                                          showPassword = true;
-                                        }
-                                      });
-                                    },
-                                    child: Icon(
-                                      Icons.remove_red_eye,
-                                      color: showPassword
-                                          ? Colors.grey
-                                          : Colors.blueAccent,
-                                    )),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                )),
+                        Form(
+                          key: _passwordKey,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: TextFormField(
+                              obscureText: showPassword,
+                              controller: passwordController,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return "Enter password";
+                                } else if (value.length < 8) {
+                                  return "8 characters required";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              showCursor: true,
+                              decoration: InputDecoration(
+                                  filled: true,
+                                  hintText: "Password",
+                                  prefixIcon: const Icon(Icons.lock_outline,
+                                      color: Colors.black54, size: 20),
+                                  fillColor: Colors.white,
+                                  suffixIcon: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (showPassword) {
+                                            showPassword = false;
+                                          } else {
+                                            showPassword = true;
+                                          }
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.remove_red_eye,
+                                        color: showPassword
+                                            ? Colors.grey
+                                            : Colors.blueAccent,
+                                      )),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  )),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  loading
-                      ? const CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.blueAccent,
-                        )
-                      : Container(
-                          height: 20,
-                        ),
-                  const SizedBox(height: 5),
-                  CupertinoButton(
-                      borderRadius: BorderRadius.circular(30),
-                      color: Colors.green,
-                      onPressed: loading
-                          ? null
-                          : () {
-                              _authenticateUser();
-                            },
-                      child: const Text("Admin Login",
-                          style: TextStyle(color: Colors.white))),
-                ],
+                      ],
+                    ),
+                    loading
+                        ? const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.blueAccent,
+                          )
+                        : Container(
+                            height: 20,
+                          ),
+                    const SizedBox(height: 5),
+                    CupertinoButton(
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.green,
+                        onPressed: loading
+                            ? null
+                            : () {
+                                _authenticateUser();
+                              },
+                        child: const Text("Admin Login",
+                            style: TextStyle(color: Colors.white))),
+                  ],
+                ),
               ),
             )));
   }

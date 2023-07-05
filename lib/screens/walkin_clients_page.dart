@@ -187,11 +187,11 @@ class _WalkingDetailsPageState extends State<WalkingDetailsPage> {
             ),
             const SizedBox(height: 20),
             loader
-                ? Padding(
-              padding: const EdgeInsets.all(8.0),
+                ? const Padding(
+              padding: EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const [
+                children: [
                   CircularProgressIndicator(
                     strokeWidth: 1,
                   ),
@@ -232,11 +232,11 @@ class _WalkingDetailsPageState extends State<WalkingDetailsPage> {
                     BorderRadius.all(Radius.circular(12.0))),
               ),
               loader
-                  ? Padding(
-                padding: const EdgeInsets.all(8.0),
+                  ? const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
+                  children: [
                     CircularProgressIndicator(
                       strokeWidth: 1,
                     ),
